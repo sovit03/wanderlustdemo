@@ -59,3 +59,58 @@ jobs:
             context: ./backend/
             push: true
             tags: sovit01/backend:1
+
+   file-transfer-docker-compose:
+    name: Copy Docker Compose file to server
+    needs: backend-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy file via SSH
+        uses: sovit01/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "docker-compose.yaml"
+          target: "/home/ubuntu/"
+
+  file-transfer-bash-script:
+    name: Copy Bash Script to Server
+    needs:   file-transfer-docker-compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Copy file via SSH
+        uses: sovit01/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "docker.sh"
+          target: "/home/ubuntu/"
+
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    needs: [file-transfer-docker-compose, file-transfer-bash-script]
+    steps:
+      - name: Execute remote commands
+        uses: sovit01/ssh-action@v1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            chmod +x /home/ubuntu/docker.sh
+            bash /home/ubuntu/docker.sh
+            echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            docker-compose up -d
+            docker system prune -f
