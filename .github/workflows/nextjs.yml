@@ -70,7 +70,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT || 22 }}
-          source: "deploy/"
+          source: "./docker-compose.yaml,./docker.sh" 
           target: "/home/ubuntu/wanderlust"
           
       - name: Execute deployment
