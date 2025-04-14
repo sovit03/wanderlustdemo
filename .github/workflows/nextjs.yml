@@ -99,5 +99,6 @@ jobs:
             chmod +x /home/ubuntu/docker.sh
             bash /home/ubuntu/docker.sh
             echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-            docker compose up -d
+            docker compose up -d 
+            #sovit karki
             
