@@ -84,4 +84,3 @@ jobs:
             cd /home/ubuntu/wanderlust
             chmod +x docker.sh
             ./docker.sh ${{ env.TAG }}
-            #sovit
